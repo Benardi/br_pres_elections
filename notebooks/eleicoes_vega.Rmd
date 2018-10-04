@@ -1,0 +1,86 @@
+---
+title: "Transforming data about Brazilian Elections"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+data <- read_csv(here::here("data/votos_tidy_long.csv"),
+                 col_types = cols(
+                      estado = col_character(),
+                      candidato = col_character(),
+                      votos = col_double(),
+                      cargo = col_character(),
+                      ano = col_integer(),
+                      turno = col_character())) %>% 
+        na.omit()
+
+data%>% 
+  glimpse()
+```
+
+```{r}
+data %>%
+  group_by(ano, turno) %>%
+  summarize(votos_ano = sum(votos)) %>%
+  ungroup() -> totais
+
+totais %>% 
+  sample_n(5)
+```
+
+```{r}
+data %>%
+  dplyr::full_join(totais, 
+                   by=c("ano", "turno")) -> data
+
+data %>%
+  glimpse()
+```
+
+```{r}
+data %>%
+  group_by(ano,turno,
+           candidato) %>%
+  summarize(votos_candidato = sum(votos)) %>%
+  ungroup() -> totais_candidatos
+
+totais_candidatos %>% 
+  sample_n(5)
+```
+
+```{r}
+data %>%
+  dplyr::full_join(totais_candidatos, 
+                   by=c("ano", "turno",
+                        "candidato")) -> data
+
+data %>%
+  glimpse()
+```
+
+```{r}
+data %>%
+  group_by(ano, turno, candidato) %>%
+  mutate(perc_candidato = votos_candidato / votos_ano) -> temp
+```
+
+```{r}
+temp %>%
+  filter(ano == 1989) %>%
+  group_by(ano,
+           turno,
+           candidato) %>%
+  slice(1) %>%
+  select(ano,turno,
+         candidato,
+         votos_ano,
+         votos_candidato,
+         perc_candidato)
+```
+

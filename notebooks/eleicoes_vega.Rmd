@@ -72,15 +72,21 @@ data %>%
 
 ```{r}
 temp %>%
-  filter(ano == 1989) %>%
-  group_by(ano,
-           turno,
-           candidato) %>%
-  slice(1) %>%
+  group_by(ano,turno, candidato) %>%
+  slice(1) %>% 
+  ungroup() %>%
+  group_by(ano,turno) %>%
+  top_n(2, perc_candidato) %>%
+  ungroup() %>%
   select(ano,turno,
-         candidato,
-         votos_ano,
+         candidato, 
+         votos_ano, 
          votos_candidato,
-         perc_candidato)
+         perc_candidato) -> max_perc_candidates
+```
+
+```{r}
+max_perc_candidates %>%
+  write_csv(here::here("data/perc_candidatos.csv"))
 ```
 

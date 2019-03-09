@@ -9,6 +9,8 @@ library(tidyverse)
 library(here)
 ```
 
+# Percentagem de votos por eleição
+
 ```{r}
 data <- read_csv(here::here("data/votos_tidy_long.csv"),
                  col_types = cols(
@@ -88,5 +90,30 @@ temp %>%
 ```{r}
 max_perc_candidates %>%
   write_csv(here::here("data/perc_candidatos.csv"))
+```
+
+# Relação Estados
+
+
+```{r}
+estados <- read_csv(here::here("data/estados.csv"),
+                    col_types = cols(
+                      uf = col_character(),
+                      estado = col_character()))
+
+abstencoes <- read_csv(here::here("data/abstencoes_ano-a-ano.csv"),
+                       col_types =  cols(
+                         estado = col_character(),
+                         ano = col_integer(),
+                         turno = col_integer(),
+                         situacao = col_character(),
+                         quantidade = col_integer(),
+                         proporcao = col_double()))
+abstencoes %>% 
+  dplyr::right_join(estados,
+                   by = c("estado"))  -> abstencoes_estado
+
+abstencoes_estado %>%
+  write_csv(here::here("data/abstencoes_uf_ano.csv"))
 ```
 
